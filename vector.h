@@ -3,21 +3,56 @@
 
 #include "generic_object.h"
 
+#define GROW_RATIO 1.3
+
 #define VECTOR(type, name)                                          \
-typedef struct name name ## _t;                                     \
+typedef struct name name##_t;                                       \
 struct name{                                                        \
-    GENERIC_OBJECT_HEADER(name ## _t)                               \
+    GENERIC_OBJECT_HEADER(name##_t)                                 \
     size_t type_size;                                               \
-} name ## _class;                                                   \
+    size_t length;                                                  \
+    size_t capacity;                                                \
+    type * begin;                                                   \
+    type * end;                                                     \
+    type * (*append) (name##_t *, type);                            \
+} name##_class;                                                     \
 \
-name ## _t * name ## _constructor(name ## _t * o){                  \
-    o -> type_size = sizeof(type);                                  \
-    return o;                                                       \
+type * name##_append(name##_t * self, type value){                  \
+    *(self->end)++ = value;                                         \
+    ++self->length;                                                 \
+    if(self->length == self->capacity){                             \
+        ++self->capacity;                                           \
+        self->capacity *= GROW_RATIO;                               \
+        self->begin = realloc(self->begin, self->type_size * self->capacity); \
+        self->end = self->begin + self->length;                     \
+    }                                                               \
+    return self->begin;                                             \
 }                                                                   \
 \
-name ## _t name ## _class = { sizeof(name ## _t),                   \
-                              name ## _constructor,                 \
-                              sizeof(type) };                       \
-name ## _t * name = &(name ## _class);
+type * name##_pop(name##_t * self, size_t index){                   \
+    if(self->length == 0)                                           \
+        return NULL;                                                \
+    index = index > 0 ? index : self->length + index;               \
+    if(index > self->length -1){                                    \
+        fprintf(stderr, "Error in pop method, index bigger than lenght-1\n"); \
+        return NULL;                                                \
+    }                                                               \
+    // Quedé aquí
+}                                                                   \
+\
+name##_t * name##_constructor(name##_t * v){                        \
+    v -> type_size = sizeof(type);                                  \
+    v -> length = 0;                                                \
+    v -> capacity = 1;                                              \
+    v -> begin = malloc(v->type_size * v->capacity);                \
+    v -> end = v->begin;                                            \
+    v -> append = name##_append;                                    \
+    return v;                                                       \
+}                                                                   \
+\
+name##_t name##_class = { sizeof(name##_t),                         \
+                          name##_constructor };                     \
+name##_t * name = &(name##_class);                                  \
+typedef type * name##_itr;                                          \
 
 #endif

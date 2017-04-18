@@ -14,8 +14,7 @@ typedef struct{
 void * new(void * o){
     generic_obj * obj = (generic_obj *) o;
     void * new_obj = malloc(obj -> obj_size);
-    obj -> constructor(new_obj);
-    return new_obj;
+    return obj -> constructor(new_obj);
 }
 
 #endif
