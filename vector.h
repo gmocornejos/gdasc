@@ -29,15 +29,15 @@ type * name##_append(name##_t * self, type value){                  \
     return self->begin;                                             \
 }                                                                   \
 \
-type * name##_pop(name##_t * self, size_t index){                   \
+type name##_pop(name##_t * self, size_t index){                   \
     if(self->length == 0)                                           \
         return NULL;                                                \
     index = index > 0 ? index : self->length + index;               \
-    if(index > self->length -1){                                    \
+    if(index > self->length - 1){                                    \
         fprintf(stderr, "Error in pop method, index bigger than lenght-1\n"); \
         return NULL;                                                \
     }                                                               \
-    // Quedé aquí
+// La idea es poner el dato en una variable temporal, usar memcpy para mover los datos y después restar length, como en append().
 }                                                                   \
 \
 name##_t * name##_constructor(name##_t * v){                        \
