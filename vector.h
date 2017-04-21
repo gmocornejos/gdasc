@@ -36,6 +36,7 @@ type * name##_append(name##_t * self, type value){                  \
     return self->begin;                                             \
 }                                                                   \
 \
+<<<<<<< HEAD
 type name##_pop(name##_t * self, int index){                        \
     if(self->length == 0){                                          \
         fprintf(stderr, "Error in pop method: vector empty");       \
@@ -60,6 +61,17 @@ type name##_pop(name##_t * self, int index){                        \
 void name##_destroy(name##_t * v){                                  \
     free(v->begin);                                                 \
     free(v);                                                        \
+=======
+type name##_pop(name##_t * self, size_t index){                   \
+    if(self->length == 0)                                           \
+        return NULL;                                                \
+    index = index > 0 ? index : self->length + index;               \
+    if(index > self->length - 1){                                    \
+        fprintf(stderr, "Error in pop method, index bigger than lenght-1\n"); \
+        return NULL;                                                \
+    }                                                               \
+// La idea es poner el dato en una variable temporal, usar memcpy para mover los datos y después restar length, como en append().
+>>>>>>> 50703fa063b14dfa16b2106a8c27771b8ced1dc9
 }                                                                   \
 \
 name##_t * name##_constructor(name##_t * v){                        \
