@@ -66,12 +66,13 @@ type name##_pop(name##_t * self, int index){                        \
 type * name##_clear(name##_t * self){                               \
     self->length = 0;                                             \
     self->capacity = 1;                                           \
-    self-> begin = realloc(self->begin, self->type_size * self->capacity); \
+    self->begin = realloc(self->begin, self->type_size * self->capacity); \
+    self->end = self->begin;                                        \
     return self->begin;                                             \
 }                                                                   \
 \
 name##_t * name##_copy(name##_t * self){                            \
-    name##_t * copy = malloc(self->obj_size);                       \
+    name##_t * copy = malloc(sizeof(name##_t));                     \
     *copy = *self;                                                  \
     copy->begin = malloc(self->type_size * self->capacity);         \
     copy->end = copy->begin + copy->length;                         \

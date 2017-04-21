@@ -3,42 +3,46 @@
 
 VECTOR(int, vector_int)
 
-int main(int argc, char * argv[]){
+void append_elements(vector_int_t * v, int n){
+    for(; n != 0; --n)
+        v->append(v, n);
+}
 
-    vector_int_t * my_vec = new(vector_int);
-    for(int i = 0; i < 100; ++i)
-        my_vec->append(my_vec, i);
+void pop_elements(vector_int_t * v, int n){
+    for(; n != 0; --n)
+        v->pop(v, -1);
+}
 
-    printf("%d\n", my_vec->pop(my_vec, -1));
-    printf("%d\n", my_vec->pop(my_vec, 50));
-
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-    printf("%d\n", my_vec->pop(my_vec, 0));
-
-    printf("%d\n", my_vec->pop(my_vec, -3));
-
-    for(vector_int_itr i = my_vec->begin; i != my_vec->end; ++i)
+void print(vector_int_t * v){
+   for(vector_int_itr i = v->begin; i != v->end; ++i)
         printf("%d ", *i);
     printf("\n");
-    
-    my_vec->destroy(my_vec);
+}
 
+int main(int argc, char * argv[]){
+
+    vector_int_t * vec = new(vector_int);
+
+    printf("Adds 100 elements and prints\n"); 
+    append_elements(vec, 100);
+    print(vec);
+
+    printf("Removes 50 elemets and prints\n");
+    pop_elements(vec, 50);
+    print(vec);
+
+    printf("Adds 100 elements, clear() and prints\n");
+    append_elements(vec, 100);
+    vec->clear(vec);
+    print(vec);
+
+    printf("Adds 100 elements, copy(), adds 50 elements to copy and prints original and copy\n");
+    append_elements(vec, 100);
+    vector_int_t * copy = vec->copy(vec);
+    append_elements(copy, 50);
+    print(vec);
+    print(copy);
+   
+    vec->destroy(vec);
     return 0;
 }
