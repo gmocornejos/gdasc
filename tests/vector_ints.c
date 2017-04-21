@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "vector.h"
+#include "../vector.h"
 
 VECTOR(int, vector_int)
 

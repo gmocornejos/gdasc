@@ -1,19 +1,21 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef VECTOR_THREAD_H
+#define VECTOR_THREAD_H
 
 #define VECTOR_EMPTY  4000
 #define INDEX_ERROR   4001 
 
 #include <string.h>
+#include <pthread.h>
 #include "generic_object.h"
 
 #define GROW_RATIO 1.2
 
-#define VECTOR(type, name)                                          \
+#define VECTOR_THREAD(type, name)                                   \
 typedef struct name name##_t;                                       \
 typedef type * name##_itr;                                          \
 struct name{                                                        \
     GENERIC_OBJECT_HEADER(name##_t)                                 \
+    pthread_mutex_t mutex;                                          \
     size_t type_size;                                               \
     size_t length;                                                  \
     size_t capacity;                                                \
@@ -25,6 +27,7 @@ struct name{                                                        \
 } name##_class;                                                     \
 \
 type * name##_append(name##_t * self, type value){                  \
+    pthread_mutex_lock(&(self->mutex));                             \
     *(self->end)++ = value;                                         \
     ++self->length;                                                 \
     if(self->length == self->capacity){                             \
@@ -33,10 +36,12 @@ type * name##_append(name##_t * self, type value){                  \
         self->begin = realloc(self->begin, self->type_size * self->capacity); \
         self->end = self->begin + self->length;                     \
     }                                                               \
+    pthread_mutex_unlock(&(self->mutex));                           \
     return self->begin;                                             \
 }                                                                   \
 \
 type name##_pop(name##_t * self, int index){                        \
+    pthread_mutex_lock(&(self->mutex));                             \
     if(self->length == 0){                                          \
         fprintf(stderr, "Error in pop method: vector empty");       \
         exit(VECTOR_EMPTY);                                         \
@@ -55,14 +60,18 @@ type name##_pop(name##_t * self, int index){                        \
     }                                                               \
     self->end = self->begin + self->length;                         \
     return pop_value;                                               \
+    pthread_mutex_unlock(&(self->mutex));                           \
 }                                                                   \
 \
-void name##_destroy(name##_t * self){                            \
+void name##_destroy(name##_t * self){                               \
+    pthread_mutex_lock(&(self->mutex));                             \
+    pthread_mutex_destroy(&(self->mutex));                          \
     free(self->begin);                                              \
     free(self);                                                     \
 }                                                                   \
 \
 name##_t * name##_constructor(name##_t * self){                     \
+    pthread_mutex_init(&(self->mutex), NULL);                       \
     self -> type_size = sizeof(type);                               \
     self -> length = 0;                                             \
     self -> capacity = 1;                                           \
