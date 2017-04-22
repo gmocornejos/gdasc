@@ -92,8 +92,8 @@ type * name##_extend(name##_t * self, name##_t * other){            \
     self->length += other->length;                                  \
     self->capacity += other->length;                                \
     self->begin = realloc(self->begin, self->capacity * self->type_size); \
-    self->end = self->begin + self->length;                         \
     memcpy(self->end, other->begin, other->length * self->type_size); \
+    self->end = self->begin + self->length;                         \
     return self->begin;                                             \
 }                                                                   \
 \

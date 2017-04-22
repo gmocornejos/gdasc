@@ -19,6 +19,10 @@ void print(vector_int_t * v){
     printf("\n");
 }
 
+int cmp_int(int a, int b){
+    return a-b;
+}
+
 int main(int argc, char * argv[]){
 
     vector_int_t * vec = new(vector_int);
@@ -42,7 +46,30 @@ int main(int argc, char * argv[]){
     append_elements(copy, 50);
     print(vec);
     print(copy);
-   
+
+    printf("How many 48 in copy: %d\n", copy->count(copy, 48, cmp_int));
+
+    printf("Extend copy with original\n");
+    copy->extend(copy, vec);
+    print(copy);
+
+    printf("First occurence of 67 in copy %d\n", copy->index(copy, 67, cmp_int));
+
+    printf("Insert 33 at index 33 of copy, ie: between 67 and 68\n");
+    copy->insert(copy, 33, 33);
+    print(copy);
+    printf("Insert 100 at index -10\n");
+    copy->insert(copy, 100, -10);
+    print(copy);
+
+    printf("remove 30 elements from copy\n");
+    pop_elements(copy, 30);
+    print(copy);
+
+    printf("Remove first occurence of value 43\n");
+    copy->remove(copy, 43, cmp_int);
+    print(copy);
+
     vec->destroy(vec);
     return 0;
 }
