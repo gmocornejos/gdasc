@@ -70,6 +70,11 @@ int main(int argc, char * argv[]){
     copy->remove(copy, 43, cmp_int);
     print(copy);
 
+    printf("Adds 100 elements, removes 75 and prints\n");
+    append_elements(copy, 100);
+    pop_elements(copy, 75);
+    print(copy);
+
     vec->destroy(vec);
     return 0;
 }
