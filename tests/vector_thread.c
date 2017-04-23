@@ -1,17 +1,35 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#include "../vector_thread.h"
+#include "../vector.h"
 
-VECTOR_THREAD(int, vec_int)
+VECTOR(int, vec_int)
 
-int global_counter = 0;
+void * print(void * vector){
+    vec_int_t * vec = vector;
+    int n;
+
+    while(vec->length < 100){
+        n = 10000;
+        while(--n);
+        pthread_mutex_lock(&(vec->mutex));
+        for(vec_int_itr i = vec->begin; i != vec->end; ++i)
+            printf("%d ", *i);
+        printf("\n");
+        pthread_mutex_unlock(&(vec->mutex));
+    }
+    pthread_exit(NULL);
+}
 
 void * inc_counter(void * vector){
-    vec_int_t * vec = vector; 
+    vec_int_t * vec = vector;
+    int n;
 
-    while(global_counter < 100)
-        vec->append(vec, global_counter++);    
+    while(vec->length < 100){
+        n = 10000;
+        while(--n);
+        vec->append(vec, vec->length);
+    }
     pthread_exit(NULL);
 }
 
@@ -21,15 +39,10 @@ int main(int argc, char * argv[]){
     pthread_t one, two;
 
     pthread_create(&one, NULL, inc_counter, vec);
-    pthread_create(&two, NULL, inc_counter, vec);
+    pthread_create(&two, NULL, print, vec);
     
     pthread_join(one, NULL);
     pthread_join(two, NULL);
-
-    pthread_mutex_lock(&(vec->mutex));
-    for(vec_int_itr i = vec->begin; i != vec->end; ++i)
-        printf("%d ", *i);
-    pthread_mutex_unlock(&(vec->mutex));
 
     vec->destroy(vec);
 
