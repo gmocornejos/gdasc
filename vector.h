@@ -5,8 +5,8 @@
 #define INDEX_ERROR   4001 
 
 #include <string.h>
+#include <stdlib.h>
 #include <pthread.h>
-#include "generic_object.h"
 
 #define GROW_RATIO 1.2
 
@@ -14,7 +14,7 @@
 typedef struct name name##_t;                                       \
 typedef type * name##_itr;                                          \
 struct name{                                                        \
-    GENERIC_OBJECT_HEADER(name##_t)                                 \
+    name##_t * (*constructor) ();                                   \
     pthread_mutex_t mutex;                                          \
     size_t type_size;                                               \
     size_t length;                                                  \
@@ -31,7 +31,7 @@ struct name{                                                        \
     type *     (*insert) (name##_t *, type, int);                   \
     type *     (*remove) (name##_t *, type, int (*cmp)(type, type));\
     void       (*destroy) (name##_t *);                             \
-} name##_class;                                                     \
+};                                                                  \
 \
 type * name##_append(name##_t * self, type value){                  \
     pthread_mutex_lock(&(self->mutex));                             \
@@ -170,7 +170,8 @@ void name##_destroy(name##_t * self){                               \
     free(self);                                                     \
 }                                                                   \
 \
-name##_t * name##_constructor(name##_t * self){                     \
+name##_t * name##_constructor(){                                    \
+    name##_t * self = malloc(sizeof(name##_t));                     \
     pthread_mutex_init(&(self->mutex), NULL);                       \
     self -> type_size = sizeof(type);                               \
     self -> length   = 0;                                           \
@@ -190,8 +191,7 @@ name##_t * name##_constructor(name##_t * self){                     \
     return self;                                                    \
 }                                                                   \
 \
-name##_t name##_class = { sizeof(name##_t),                         \
-                          name##_constructor };                     \
+name##_t name##_class = { name##_constructor };                     \
 name##_t * name = &(name##_class);
 
 #endif

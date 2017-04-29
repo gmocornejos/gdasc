@@ -35,7 +35,7 @@ void * inc_counter(void * vector){
 
 int main(int argc, char * argv[]){
 
-    vec_int_t * vec = new(vec_int);
+    vec_int_t * vec = vec_int -> constructor();
     pthread_t one, two;
 
     pthread_create(&one, NULL, inc_counter, vec);

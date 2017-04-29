@@ -25,7 +25,7 @@ int cmp_int(int a, int b){
 
 int main(int argc, char * argv[]){
 
-    vector_int_t * vec = new(vector_int);
+    vector_int_t * vec = vector_int -> constructor();
 
     printf("Adds 100 elements and prints\n"); 
     append_elements(vec, 100);
