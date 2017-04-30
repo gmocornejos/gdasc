@@ -53,7 +53,7 @@ type name##_pop(name##_t * self, int index){                        \
         exit(VECTOR_EMPTY);                                         \
     }                                                               \
     index = index >= 0 ? index : self->length + index;              \
-    if(index >= self->length){                                      \
+    if(index >= self->length || index < 0){                         \
         fprintf(stderr, "Error in pop method: index bigger or equal than length\n"); \
         exit(INDEX_ERROR);                                          \
     }                                                               \
@@ -129,7 +129,7 @@ int name##_index(name##_t * self, type value, int (*cmp)(type, type)){ \
 type * name##_insert(name##_t * self, type value, int index){       \
     pthread_mutex_lock(&(self->mutex));                             \
     index = index >= 0 ? index : self->length + index;              \
-    if(index >= self->length){                                      \
+    if(index >= self->length || index < 0){                         \
         fprintf(stderr, "Error in pop method: index bigger or equal than length\n"); \
         exit(INDEX_ERROR);                                          \
     }                                                               \
