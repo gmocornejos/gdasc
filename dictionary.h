@@ -31,8 +31,10 @@ struct name{                                                        \
     value_t (*get) (name##_t *, key_t);                             \
     value_t (*pop) (name##_t *, key_t);                             \
     int (*index) (name##_t *, key_t);                               \
-    value_t (*popindex) (name##_t *, int);                          \
+    name##_entry (*popindex) (name##_t *, int);                     \
     name##_entry * (*clear) (name##_t *);                           \
+    name##_t * (*copy) (name##_t *);                                \
+    name##_entry * (*update) (name##_t *, name##_t *);              \
 };                                                                  \
 \
 name##_entry * name##_set(name##_t * self , key_t k, value_t v){    \
@@ -109,7 +111,7 @@ int name##_index(name##_t * self, key_t k){                         \
     return -1;                                                      \
 }                                                                   \
 \
-value_t name##_popindex(name##_t * self, int index){                \
+name##_entry name##_popindex(name##_t * self, int index){           \
     pthread_mutex_lock(&(self->mutex));                             \
     if(self->length == 0){                                          \
         fprintf(stderr, "Error in popindex method: dictionary empty");\
@@ -120,7 +122,7 @@ value_t name##_popindex(name##_t * self, int index){                \
         fprintf(stderr, "Error in popindex method: index bigger or equal than length\n");\
         exit(INDEX_ERROR);                                          \
     }                                                               \
-    value_t v = self->begin[index].value;                           \
+    name##_entry e = self->begin[index];                            \
     --self->length;                                                 \
     memmove(self->begin + index, self->begin + index+1, self->entry_size * (self->length - index));\
     if(self->capacity > GROW_RATIO * self->length){                 \
@@ -129,7 +131,7 @@ value_t name##_popindex(name##_t * self, int index){                \
     }                                                               \
     self->end = self->begin + self->length;                         \
     pthread_mutex_unlock(&(self->mutex));                           \
-    return v;                                                       \
+    return e;                                                       \
 }                                                                   \
 \
 name##_entry * name##_clear(name##_t * self){                       \
@@ -154,6 +156,33 @@ name##_t * name##_copy(name##_t * self){                            \
     return copy;                                                    \
 }                                                                   \
 \
+name##_entry * name##_update(name##_t * self, name##_t * other){    \
+    pthread_mutex_lock(&(self->mutex));                             \
+    pthread_mutex_lock(&(other->mutex));                            \
+    name##_itr s;                                                   \
+    for(name##_itr o = other->begin; o != other->end; ++o){         \
+        for(s = self->begin; s != self->end; ++s)                   \
+            if(self->cmp(o->key, s->key) == 0){                     \
+                s->value = o->value;                                \
+                break;                                              \
+            }                                                       \
+        if(s == self->end){                                         \
+            self->end -> key   = o->key;                            \
+            self->end -> value = o->value;                          \
+            self->end++;                                            \
+            if(++self->length == self->capacity){                   \
+                ++self->capacity;                                   \
+                self->capacity *= GROW_RATIO;                       \
+                self->begin = realloc(self->begin, self->entry_size * self->capacity);\
+                self->end = self->begin + self->length;             \
+            }                                                       \
+        }                                                           \
+    }                                                               \
+    pthread_mutex_unlock(&(other->mutex));                          \
+    pthread_mutex_unlock(&(self->mutex));                           \
+    return self->begin;                                             \
+}\
+\
 name##_t * name##_constructor(int (*cmp)(key_t, value_t)){          \
     name##_t * self = malloc(sizeof(name##_t));                     \
     pthread_mutex_init(&(self->mutex), NULL);                       \
@@ -169,6 +198,8 @@ name##_t * name##_constructor(int (*cmp)(key_t, value_t)){          \
     self -> index    = name##_index;                                \
     self -> popindex = name##_popindex;                             \
     self -> clear    = name##_clear;                                \
+    self -> copy     = name##_copy;                                 \
+    self -> update   = name##_update;                               \
     return self;                                                    \
 }                                                                   \
 \

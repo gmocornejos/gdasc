@@ -109,8 +109,8 @@ type * name##_extend(name##_t * self, name##_t * other){            \
     self->begin = realloc(self->begin, self->capacity * self->type_size); \
     memcpy(self->end, other->begin, other->length * other->type_size); \
     self->end = self->begin + self->length;                         \
-    pthread_mutex_unlock(&(self->mutex));                           \
     pthread_mutex_unlock(&(other->mutex));                          \
+    pthread_mutex_unlock(&(self->mutex));                           \
     return self->begin;                                             \
 }                                                                   \
 \
