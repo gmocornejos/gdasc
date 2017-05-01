@@ -19,14 +19,14 @@ typedef struct{                                                     \
 typedef struct name name##_t;                                       \
 typedef name##_entry * name##_itr;                                  \
 struct name{                                                        \
-    name##_t * (*constructor)(int (*cmp)(key_t, value_t));          \
+    name##_t * (*constructor)(int (*cmp)(key_t, key_t));            \
     pthread_mutex_t mutex;                                          \
     size_t entry_size;                                              \
     size_t length;                                                  \
     size_t capacity;                                                \
     name##_entry * begin;                                           \
     name##_entry * end;                                             \
-    int (*cmp) (key_t, value_t);                                    \
+    int (*cmp) (key_t, key_t);                                      \
     name##_entry * (*set) (name##_t *, key_t, value_t);             \
     value_t (*get) (name##_t *, key_t);                             \
     value_t (*pop) (name##_t *, key_t);                             \
@@ -35,6 +35,7 @@ struct name{                                                        \
     name##_entry * (*clear) (name##_t *);                           \
     name##_t * (*copy) (name##_t *);                                \
     name##_entry * (*update) (name##_t *, name##_t *);              \
+    void (*destroy) (name##_t *);                                   \
 };                                                                  \
 \
 name##_entry * name##_set(name##_t * self , key_t k, value_t v){    \
@@ -183,7 +184,14 @@ name##_entry * name##_update(name##_t * self, name##_t * other){    \
     return self->begin;                                             \
 }\
 \
-name##_t * name##_constructor(int (*cmp)(key_t, value_t)){          \
+void name##_destroy(name##_t * self){                               \
+    pthread_mutex_lock(&(self->mutex));                             \
+    free(self->begin);                                              \
+    pthread_mutex_destroy(&(self->mutex));                          \
+    free(self);                                                     \
+}                                                                   \
+\
+name##_t * name##_constructor(int (*cmp)(key_t, key_t)){            \
     name##_t * self = malloc(sizeof(name##_t));                     \
     pthread_mutex_init(&(self->mutex), NULL);                       \
     self -> entry_size = sizeof(name##_entry);                      \
@@ -200,6 +208,7 @@ name##_t * name##_constructor(int (*cmp)(key_t, value_t)){          \
     self -> clear    = name##_clear;                                \
     self -> copy     = name##_copy;                                 \
     self -> update   = name##_update;                               \
+    self -> destroy  = name##_destroy;                              \
     return self;                                                    \
 }                                                                   \
 \

@@ -59,5 +59,8 @@ int main(int argc, char * argv[]){
     copy->update(copy, dict);
     print(copy);
 
+    dict->destroy(dict);
+    copy->destroy(copy);
+
     return 0;
 }
