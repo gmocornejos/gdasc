@@ -138,7 +138,7 @@ type * name##_insert(name * self, type value, int index){           \
     }                                                               \
     if(self->length+1 == self->capacity){                           \
         ++self->capacity;                                           \
-        self->capacity *= GROW_RATIO;                               \
+        self->capacity *= VEC_GROW_RATIO;                           \
         self->begin = realloc(self->begin, self->capacity * self->type_size); \
     }                                                               \
     memmove(self->begin+index+1, self->begin+index, self->type_size * (self->length - index));                                                  \
