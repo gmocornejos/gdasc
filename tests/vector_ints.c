@@ -1,19 +1,20 @@
 #include <stdio.h>
 #include "../vector.h"
 
-VECTOR(int, vector_int)
+VECTOR_DECLARE(int, vector_int)
+VECTOR_GEN_CODE(int, vector_int)
 
-void append_elements(vector_int_t * v, int n){
+void append_elements(vector_int * v, int n){
     for(; n != 0; --n)
         v->append(v, n);
 }
 
-void pop_elements(vector_int_t * v, int n){
+void pop_elements(vector_int * v, int n){
     for(; n != 0; --n)
         v->pop(v, -1);
 }
 
-void print(vector_int_t * v){
+void print(vector_int * v){
    for(vector_int_itr i = v->begin; i != v->end; ++i)
         printf("%d ", *i);
     printf("\n");
@@ -25,7 +26,7 @@ int cmp_int(int a, int b){
 
 int main(int argc, char * argv[]){
 
-    vector_int_t * vec = vector_int -> constructor();
+    vector_int * vec = vector_int_class.constructor();
 
     printf("Adds 100 elements and prints\n"); 
     append_elements(vec, 100);
@@ -42,7 +43,7 @@ int main(int argc, char * argv[]){
 
     printf("Adds 100 elements, copy(), adds 50 elements to copy and prints original and copy\n");
     append_elements(vec, 100);
-    vector_int_t * copy = vec->copy(vec);
+    vector_int * copy = vec->copy(vec);
     append_elements(copy, 50);
     print(vec);
     print(copy);

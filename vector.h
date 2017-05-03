@@ -1,44 +1,47 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#define VECTOR_EMPTY     4000
+#define VECTOR_EMPTY    4000
 #define VEC_INDEX_ERROR 4001 
 
 #include <string.h>
 #include <stdlib.h>
 #include <pthread.h>
 
-#define GROW_RATIO 1.2
+#define VEC_GROW_RATIO 1.2
 
-#define VECTOR(type, name)                                          \
-typedef struct name name##_t;                                       \
+#define VECTOR_DECLARE(type, name)                                  \
+typedef struct name name;                                           \
 typedef type * name##_itr;                                          \
 struct name{                                                        \
-    name##_t * (*constructor) ();                                   \
     pthread_mutex_t mutex;                                          \
     size_t type_size;                                               \
     size_t length;                                                  \
     size_t capacity;                                                \
     type * begin;                                                   \
     type * end;                                                     \
-    type *     (*append) (name##_t *, type);                        \
-    type       (*pop) (name##_t *, int);                            \
-    type *     (*clear) (name##_t *);                               \
-    name##_t * (*copy) (name##_t *);                                \
-    int        (*count) (name##_t *, type, int (*cmp)(type, type)); \
-    type *     (*extend) (name##_t *, name##_t *);                  \
-    int        (*index) (name##_t * , type, int (*cmp)(type, type));\
-    type *     (*insert) (name##_t *, type, int);                   \
-    type *     (*remove) (name##_t *, type, int (*cmp)(type, type));\
-    void       (*destroy) (name##_t *);                             \
+    name * (*constructor) ();                                       \
+    type * (*append)  (name *, type);                               \
+    type   (*pop)     (name *, int);                                \
+    type * (*clear)   (name *);                                     \
+    name * (*copy)    (name *);                                     \
+    int    (*count)   (name *, type, int (*cmp)(type, type));       \
+    type * (*extend)  (name *, name *);                             \
+    int    (*index)   (name * , type, int (*cmp)(type, type));      \
+    type * (*insert)  (name *, type, int);                          \
+    type * (*remove)  (name *, type, int (*cmp)(type, type));       \
+    void   (*destroy) (name *);                                     \
 };                                                                  \
-\
-type * name##_append(name##_t * self, type value){                  \
+extern name name##_class;                                                
+
+
+#define VECTOR_GEN_CODE(type, name)                                 \
+type * name##_append(name * self, type value){                      \
     pthread_mutex_lock(&(self->mutex));                             \
     *(self->end)++ = value;                                         \
     if(++self->length == self->capacity){                           \
         ++self->capacity;                                           \
-        self->capacity *= GROW_RATIO;                               \
+        self->capacity *= VEC_GROW_RATIO;                           \
         self->begin = realloc(self->begin, self->type_size * self->capacity); \
         self->end = self->begin + self->length;                     \
     }                                                               \
@@ -46,7 +49,7 @@ type * name##_append(name##_t * self, type value){                  \
     return self->begin;                                             \
 }                                                                   \
 \
-type name##_pop(name##_t * self, int index){                        \
+type name##_pop(name * self, int index){                            \
     pthread_mutex_lock(&(self->mutex));                             \
     if(self->length == 0){                                          \
         fprintf(stderr, "Error in pop method: vector empty");       \
@@ -60,7 +63,7 @@ type name##_pop(name##_t * self, int index){                        \
     type pop_value = self->begin[index];                            \
     --self->length;                                                 \
     memmove(self->begin + index, self->begin + index+1, self->type_size * (self->length - index));                                              \
-    if(self->capacity > GROW_RATIO * self->length){                 \
+    if(self->capacity > VEC_GROW_RATIO * self->length){             \
         self->capacity = self->length + 1;                          \
         self->begin = realloc(self->begin, self->type_size * self->capacity); \
     }                                                               \
@@ -69,7 +72,7 @@ type name##_pop(name##_t * self, int index){                        \
     return pop_value;                                               \
 }                                                                   \
 \
-type * name##_clear(name##_t * self){                               \
+type * name##_clear(name * self){                                   \
     pthread_mutex_lock(&(self->mutex));                             \
     self->length = 0;                                               \
     self->capacity = 1;                                             \
@@ -79,9 +82,9 @@ type * name##_clear(name##_t * self){                               \
     return self->begin;                                             \
 }                                                                   \
 \
-name##_t * name##_copy(name##_t * self){                            \
+name * name##_copy(name * self){                                    \
     pthread_mutex_lock(&(self->mutex));                             \
-    name##_t * copy = malloc(sizeof(name##_t));                     \
+    name * copy = malloc(sizeof(name));                             \
     *copy = *self;                                                  \
     pthread_mutex_init(&(copy->mutex), NULL);                       \
     copy->begin = malloc(self->type_size * self->capacity);         \
@@ -91,7 +94,7 @@ name##_t * name##_copy(name##_t * self){                            \
     return copy;                                                    \
 }                                                                   \
 \
-int name##_count(name##_t * self, type value, int (*cmp)(type, type)){ \
+int name##_count(name * self, type value, int (*cmp)(type, type)){  \
     pthread_mutex_lock(&(self->mutex));                             \
     int count = 0;                                                  \
     for(name##_itr i = self->begin; i != self->end; ++i)            \
@@ -101,7 +104,7 @@ int name##_count(name##_t * self, type value, int (*cmp)(type, type)){ \
     return count;                                                   \
 }                                                                   \
 \
-type * name##_extend(name##_t * self, name##_t * other){            \
+type * name##_extend(name * self, name * other){                    \
     pthread_mutex_lock(&(self->mutex));                             \
     pthread_mutex_lock(&(other->mutex));                            \
     self->length += other->length;                                  \
@@ -114,7 +117,7 @@ type * name##_extend(name##_t * self, name##_t * other){            \
     return self->begin;                                             \
 }                                                                   \
 \
-int name##_index(name##_t * self, type value, int (*cmp)(type, type)){ \
+int name##_index(name * self, type value, int (*cmp)(type, type)){  \
     pthread_mutex_lock(&(self->mutex));                             \
     int r_value = -1;                                               \
     for(int i = 0; i < self->length; ++i)                           \
@@ -126,7 +129,7 @@ int name##_index(name##_t * self, type value, int (*cmp)(type, type)){ \
     return r_value;                                                 \
 }                                                                   \
 \
-type * name##_insert(name##_t * self, type value, int index){       \
+type * name##_insert(name * self, type value, int index){           \
     pthread_mutex_lock(&(self->mutex));                             \
     index = index >= 0 ? index : self->length + index;              \
     if(index >= self->length || index < 0){                         \
@@ -146,7 +149,7 @@ type * name##_insert(name##_t * self, type value, int index){       \
     return self->begin;                                             \
 }                                                                   \
 \
-type * name##_remove(name##_t * self, type value, int (*cmp)(type, type)){ \
+type * name##_remove(name * self, type value, int (*cmp)(type, type)){ \
     pthread_mutex_lock(&(self->mutex));                             \
     for(int i = 0; i < self->length; ++i)                           \
         if(cmp(value, self->begin[i]) == 0){                        \
@@ -154,7 +157,7 @@ type * name##_remove(name##_t * self, type value, int (*cmp)(type, type)){ \
             --self->length;                                         \
             break;                                                  \
         }                                                           \
-    if(self->capacity > GROW_RATIO * self->length){                 \
+    if(self->capacity > VEC_GROW_RATIO * self->length){             \
         self->capacity = self->length + 1;                          \
         self->begin = realloc(self->begin, self->type_size * self->capacity); \
     }                                                               \
@@ -163,35 +166,37 @@ type * name##_remove(name##_t * self, type value, int (*cmp)(type, type)){ \
     return self->begin;                                             \
 }                                                                   \
 \
-void name##_destroy(name##_t * self){                               \
+void name##_destroy(name * self){                                   \
     pthread_mutex_lock(&(self->mutex));                             \
     free(self->begin);                                              \
     pthread_mutex_destroy(&(self->mutex));                          \
     free(self);                                                     \
 }                                                                   \
 \
-name##_t * name##_constructor(){                                    \
-    name##_t * self = malloc(sizeof(name##_t));                     \
-    pthread_mutex_init(&(self->mutex), NULL);                       \
-    self -> type_size = sizeof(type);                               \
-    self -> length   = 0;                                           \
-    self -> capacity = 1;                                           \
-    self -> begin    = malloc(self->type_size * self->capacity);    \
-    self -> end      = self->begin;                                 \
-    self -> append   = name##_append;                               \
-    self -> pop      = name##_pop;                                  \
-    self -> clear    = name##_clear;                                \
-    self -> copy     = name##_copy;                                 \
-    self -> count    = name##_count;                                \
-    self -> extend   = name##_extend;                               \
-    self -> index    = name##_index;                                \
-    self -> insert   = name##_insert;                               \
-    self -> remove   = name##_remove;                               \
-    self -> destroy  = name##_destroy;                              \
+name * name##_constructor(){                                        \
+    name * self   = malloc(sizeof(name));                           \
+    *self         = name##_class;                                   \
+    self -> begin = malloc(self->type_size * self->capacity);       \
+    self -> end   = self->begin;                                    \
     return self;                                                    \
 }                                                                   \
 \
-name##_t name##_class = { name##_constructor };                     \
-name##_t * name = &(name##_class);
-
+name name##_class = { PTHREAD_MUTEX_INITIALIZER,                    \
+                      sizeof(type),                                 \
+                      0,                                            \
+                      1,                                            \
+                      NULL,                                         \
+                      NULL,                                         \
+                      name##_constructor,                           \
+                      name##_append,                                \
+                      name##_pop,                                   \
+                      name##_clear,                                 \
+                      name##_copy,                                  \
+                      name##_count,                                 \
+                      name##_extend,                                \
+                      name##_index,                                 \
+                      name##_insert,                                \
+                      name##_remove,                                \
+                      name##_destroy                                \
+                    };
 #endif

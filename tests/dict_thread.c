@@ -2,10 +2,11 @@
 
 #include "../dictionary.h"
 
-DICTIONARY(char, int, d_char_int)
+DICTIONARY_DECLARE(char, int, d_char_int)
+DICTIONARY_GEN_CODE(char, int, d_char_int)
 
 void * print(void * d){
-    d_char_int_t * dict = d;
+    d_char_int * dict = d;
     int n;
 
     while(dict->length < 256){
@@ -21,7 +22,7 @@ void * print(void * d){
 }
 
 void * fill_dict(void * d){
-    d_char_int_t * dict = d;
+    d_char_int * dict = d;
     int n;
 
     while(dict->length < 256){
@@ -38,7 +39,7 @@ int cmp_chars(char a, char b){
 
 int main(int argc, char * argv[]){
 
-    d_char_int_t * dict = d_char_int->constructor(cmp_chars);
+    d_char_int * dict = d_char_int_class.constructor(cmp_chars);
     pthread_t one, two;
 
     pthread_create(&one, NULL, fill_dict, dict);

@@ -3,10 +3,11 @@
 
 #include "../vector.h"
 
-VECTOR(int, vec_int)
+VECTOR_DECLARE(int, vec_int)
+VECTOR_GEN_CODE(int, vec_int)
 
 void * print(void * vector){
-    vec_int_t * vec = vector;
+    vec_int * vec = vector;
     int n;
 
     while(vec->length < 100){
@@ -22,7 +23,7 @@ void * print(void * vector){
 }
 
 void * inc_counter(void * vector){
-    vec_int_t * vec = vector;
+    vec_int * vec = vector;
     int n;
 
     while(vec->length < 100){
@@ -35,7 +36,7 @@ void * inc_counter(void * vector){
 
 int main(int argc, char * argv[]){
 
-    vec_int_t * vec = vec_int -> constructor();
+    vec_int * vec = vec_int_class.constructor();
     pthread_t one, two;
 
     pthread_create(&one, NULL, inc_counter, vec);

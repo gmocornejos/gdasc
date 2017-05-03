@@ -1,21 +1,22 @@
 #include <stdio.h>
 #include "../dictionary.h"
 
-DICTIONARY(char, int, dict_ints)
+DICTIONARY_DECLARE(char, int, dict_char_int)
+DICTIONARY_GEN_CODE(char, int, dict_char_int)
 
-int compare_ints(char i, int j){
+int compare_ints(char i, char j){
     return i - j;
 }
 
-void print(dict_ints_t * d){
-    for(dict_ints_itr i = d->begin; i != d->end; ++i)
+void print(dict_char_int * d){
+    for(dict_char_int_itr i = d->begin; i != d->end; ++i)
         printf("%c:%d ", i->key, i->value);
     printf("\n");
 }
 
 int main(int argc, char * argv[]){
 
-    dict_ints_t * dict = dict_ints -> constructor(compare_ints);
+    dict_char_int * dict = dict_char_int_class.constructor(compare_ints);
 
     printf("Sets the letters of the alphabet\n");
     for(int i = 0; i < 26; ++i)
@@ -38,12 +39,12 @@ int main(int argc, char * argv[]){
 
     printf("E is at index %d\n", dict->index(dict, 'E'));
 
-    dict_ints_entry e = dict->popindex(dict, 6);
+    dict_char_int_entry e = dict->popindex(dict, 6);
     printf("Pop entry at index 6, k: %c, v: %d\n", e.key, e.value);
     print(dict);
 
     printf("Copy dictionary, clear original and set A: 5\n");
-    dict_ints_t * copy = dict->copy(dict);
+    dict_char_int * copy = dict->copy(dict);
     dict->clear(dict);
     dict->set(dict, 'A', 5);
     print(copy);
