@@ -2,7 +2,7 @@
 #define VECTOR_H
 
 #define VECTOR_EMPTY     4000
-#define DICT_INDEX_ERROR 4001 
+#define VEC_INDEX_ERROR 4001 
 
 #include <string.h>
 #include <stdlib.h>
