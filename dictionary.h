@@ -1,9 +1,9 @@
 #ifndef DICTIONARY_H
 #define DICTIONARY_H
 
-#define DICT_EMPTY  5000
-#define NO_KEY      5001
-#define INDEX_ERROR 5003
+#define DICT_EMPTY       5000
+#define NO_KEY           5001
+#define DICT_INDEX_ERROR 5003
 
 #include <string.h>
 #include <stdlib.h>
@@ -121,7 +121,7 @@ name##_entry name##_popindex(name##_t * self, int index){           \
     index = index >= 0 ? index : self->length + index;              \
     if(index >= self->length || index < 0){                         \
         fprintf(stderr, "Error in popindex method: index bigger or equal than length\n");\
-        exit(INDEX_ERROR);                                          \
+        exit(DICT_INDEX_ERROR);                                     \
     }                                                               \
     name##_entry e = self->begin[index];                            \
     --self->length;                                                 \

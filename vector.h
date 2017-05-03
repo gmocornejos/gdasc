@@ -1,8 +1,8 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-#define VECTOR_EMPTY  4000
-#define INDEX_ERROR   4001 
+#define VECTOR_EMPTY     4000
+#define DICT_INDEX_ERROR 4001 
 
 #include <string.h>
 #include <stdlib.h>
@@ -55,7 +55,7 @@ type name##_pop(name##_t * self, int index){                        \
     index = index >= 0 ? index : self->length + index;              \
     if(index >= self->length || index < 0){                         \
         fprintf(stderr, "Error in pop method: index bigger or equal than length\n"); \
-        exit(INDEX_ERROR);                                          \
+        exit(VEC_INDEX_ERROR);                                      \
     }                                                               \
     type pop_value = self->begin[index];                            \
     --self->length;                                                 \
@@ -131,7 +131,7 @@ type * name##_insert(name##_t * self, type value, int index){       \
     index = index >= 0 ? index : self->length + index;              \
     if(index >= self->length || index < 0){                         \
         fprintf(stderr, "Error in pop method: index bigger or equal than length\n"); \
-        exit(INDEX_ERROR);                                          \
+        exit(VEC_INDEX_ERROR);                                      \
     }                                                               \
     if(self->length+1 == self->capacity){                           \
         ++self->capacity;                                           \
