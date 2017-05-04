@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#include "../vector.h"
+#include "../gdasc_vector.h"
 
 VECTOR_DECLARE(int, vec_int)
 VECTOR_GEN_CODE(int, vec_int)

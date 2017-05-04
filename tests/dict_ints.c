@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../dictionary.h"
+#include "../gdasc_dictionary.h"
 
 DICTIONARY_DECLARE(char, int, dict_char_int)
 DICTIONARY_GEN_CODE(char, int, dict_char_int)

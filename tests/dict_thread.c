@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "../dictionary.h"
+#include "../gdasc_dictionary.h"
 
 DICTIONARY_DECLARE(char, int, d_char_int)
 DICTIONARY_GEN_CODE(char, int, d_char_int)

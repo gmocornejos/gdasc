@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../vector.h"
+#include "../gdasc_vector.h"
 
 VECTOR_DECLARE(int, vector_int)
 VECTOR_GEN_CODE(int, vector_int)
