@@ -30,6 +30,8 @@ struct name{                                                        \
     int    (*index)   (name * , type, int (*cmp)(type, type));      \
     type * (*insert)  (name *, type, int);                          \
     type * (*remove)  (name *, type, int (*cmp)(type, type));       \
+    void   (*protect) (name *);                                     \
+    void   (*release) (name *);                                     \
     void   (*destroy) (name *);                                     \
 };                                                                  \
 extern name name##_class;                                                
@@ -166,6 +168,14 @@ type * name##_remove(name * self, type value, int (*cmp)(type, type)){ \
     return self->begin;                                             \
 }                                                                   \
 \
+void name##_protect(name * self){                                   \
+    pthread_mutex_lock(&(self->mutex));                             \
+}                                                                   \
+\
+void name##_release(name * self){                                   \
+    pthread_mutex_unlock(&(self->mutex));                           \
+}                                                                   \
+\
 void name##_destroy(name * self){                                   \
     pthread_mutex_lock(&(self->mutex));                             \
     free(self->begin);                                              \
@@ -197,6 +207,8 @@ name name##_class = { PTHREAD_MUTEX_INITIALIZER,                    \
                       name##_index,                                 \
                       name##_insert,                                \
                       name##_remove,                                \
+                      name##_protect,                               \
+                      name##_release,                               \
                       name##_destroy                                \
                     };
 #endif

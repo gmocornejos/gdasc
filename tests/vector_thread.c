@@ -13,11 +13,11 @@ void * print(void * vector){
     while(vec->length < 100){
         n = 10000;
         while(--n);
-        pthread_mutex_lock(&(vec->mutex));
+        vec->protect(vec);
         for(vec_int_itr i = vec->begin; i != vec->end; ++i)
             printf("%d ", *i);
         printf("\n");
-        pthread_mutex_unlock(&(vec->mutex));
+        vec->release(vec);
     }
     pthread_exit(NULL);
 }

@@ -12,11 +12,11 @@ void * print(void * d){
     while(dict->length < 256){
         n = 10000;
         while(--n);
-        pthread_mutex_lock(&(dict->mutex));
+        dict->protect(dict);
         for(d_char_int_itr i = dict->begin; i != dict->end; ++i)
             printf("%c: %d, ", i->key, i->value);
         printf("\n");
-        pthread_mutex_unlock(&(dict->mutex));
+        dict->release(dict);
     }
     pthread_exit(NULL);
 }
