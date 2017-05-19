@@ -29,7 +29,9 @@ void * inc_counter(void * vector){
     while(vec->length < 100){
         n = 10000;
         while(--n);
+        vec->protect(vec);
         vec->append(vec, vec->length);
+        vec->release(vec);
     }
     pthread_exit(NULL);
 }

@@ -10,13 +10,13 @@ void * print(void * d){
     int n;
 
     while(dict->length < 256){
-        n = 10000;
+        n = 100000;
         while(--n);
         dict->protect(dict);
         for(d_char_int_itr i = dict->begin; i != dict->end; ++i)
             printf("%c: %d, ", i->key, i->value);
-        printf("\n");
         dict->release(dict);
+        printf("\n");
     }
     pthread_exit(NULL);
 }
@@ -28,7 +28,9 @@ void * fill_dict(void * d){
     while(dict->length < 256){
         n = 10000;
         while(--n);
+        dict->protect(dict);
         dict->set(dict, (char)dict->length, (int)dict->length);
+        dict->release(dict);
     }
     pthread_exit(NULL);
 }

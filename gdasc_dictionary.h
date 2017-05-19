@@ -44,11 +44,9 @@ extern name name##_class;                                           \
 
 #define DICTIONARY_GEN_CODE(key_t, value_t, name)                   \
 name##_entry * name##_set(name * self , key_t k, value_t v){    \
-    pthread_mutex_lock(&(self->mutex));                             \
     for(name##_itr i = self->begin; i != self->end; ++i){           \
         if(self->cmp(i->key, k) == 0){                              \
             i->value = v;                                           \
-            pthread_mutex_unlock(&(self->mutex));                   \
             return self->begin;                                     \
         }                                                           \
     }                                                               \
@@ -61,19 +59,16 @@ name##_entry * name##_set(name * self , key_t k, value_t v){    \
         self->begin = realloc(self->begin, self->entry_size * self->capacity);\
         self->end = self->begin + self->length;                     \
     }                                                               \
-    pthread_mutex_unlock(&(self->mutex));                           \
     return self->begin;                                             \
 }                                                                   \
 \
 value_t  name##_get(name * self, key_t k){                      \
-    pthread_mutex_lock(&(self->mutex));                             \
     if(self->length == 0){                                          \
         fprintf(stderr, "Error in get method: dictionary empty");   \
         exit(DICT_EMPTY);                                           \
     }                                                               \
     for(name##_itr i = self->begin; i != self->end; ++i){           \
         if(self->cmp(i->key, k) == 0){                              \
-            pthread_mutex_unlock(&(self->mutex));                   \
             return i->value;                                        \
         }                                                           \
     }                                                               \
@@ -82,7 +77,6 @@ value_t  name##_get(name * self, key_t k){                      \
 }                                                                   \
 \
 value_t name##_pop(name * self, key_t k){                           \
-    pthread_mutex_lock(&(self->mutex));                             \
     if(self->length == 0){                                          \
         fprintf(stderr, "Error in pop method: dictionary empty");   \
         exit(DICT_EMPTY);                                           \
@@ -97,7 +91,6 @@ value_t name##_pop(name * self, key_t k){                           \
                 self->begin = realloc(self->begin, self->entry_size * self->capacity);\
             }                                                       \
             self->end = self->begin + self->length;                 \
-            pthread_mutex_unlock(&(self->mutex));                   \
             return v;                                               \
         }                                                           \
     }                                                               \
@@ -107,19 +100,16 @@ value_t name##_pop(name * self, key_t k){                           \
 \
 int name##_index(name * self, key_t k){                             \
     int r_value = -1;                                               \
-    pthread_mutex_lock(&(self->mutex));                             \
     for(int i = 0; i != self->length; ++i){                         \
         if(self->cmp(self->begin[i].key, k) == 0){                  \
             r_value = i;                                            \
             break;                                                  \
         }                                                           \
     }                                                               \
-    pthread_mutex_unlock(&(self->mutex));                           \
     return r_value;                                                 \
 }                                                                   \
 \
 name##_entry name##_popindex(name * self, int index){               \
-    pthread_mutex_lock(&(self->mutex));                             \
     if(self->length == 0){                                          \
         fprintf(stderr, "Error in popindex method: dictionary empty");\
         exit(DICT_EMPTY);                                           \
@@ -137,35 +127,28 @@ name##_entry name##_popindex(name * self, int index){               \
         self->begin = realloc(self->begin, self->entry_size * self->capacity); \
     }                                                               \
     self->end = self->begin + self->length;                         \
-    pthread_mutex_unlock(&(self->mutex));                           \
     return e;                                                       \
 }                                                                   \
 \
 name##_entry * name##_clear(name * self){                           \
-    pthread_mutex_lock(&(self->mutex));                             \
     self->length = 0;                                               \
     self->capacity = 1;                                             \
     self->begin = realloc(self->begin, self->entry_size * self->capacity);\
     self->end = self->begin;                                        \
-    pthread_mutex_unlock(&(self->mutex));                           \
     return self->begin;                                             \
 }                                                                   \
 \
 name * name##_copy(name * self){                                    \
-    pthread_mutex_lock(&(self->mutex));                             \
     name * copy = malloc(sizeof(name));                             \
     *copy = *self;                                                  \
     pthread_mutex_init(&(copy->mutex), NULL);                       \
     copy->begin = malloc(self->entry_size * self->capacity);        \
     copy->end = copy->begin + copy->length;                         \
     memcpy(copy->begin, self->begin, self->length * self->entry_size);\
-    pthread_mutex_unlock(&(self->mutex));                           \
     return copy;                                                    \
 }                                                                   \
 \
 name##_entry * name##_update(name * self, name * other){            \
-    pthread_mutex_lock(&(self->mutex));                             \
-    pthread_mutex_lock(&(other->mutex));                            \
     name##_itr s;                                                   \
     for(name##_itr o = other->begin; o != other->end; ++o){         \
         for(s = self->begin; s != self->end; ++s)                   \
@@ -185,8 +168,6 @@ name##_entry * name##_update(name * self, name * other){            \
             }                                                       \
         }                                                           \
     }                                                               \
-    pthread_mutex_unlock(&(other->mutex));                          \
-    pthread_mutex_unlock(&(self->mutex));                           \
     return self->begin;                                             \
 }\
 \
