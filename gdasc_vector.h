@@ -117,8 +117,8 @@ int name##_index(name * self, type value, int (*cmp)(type, type)){  \
 \
 type * name##_insert(name * self, type value, int index){           \
     index = index >= 0 ? index : self->length + index;              \
-    if(index >= self->length || index < 0){                         \
-        fprintf(stderr, "Error in pop method: index bigger or equal than length\n"); \
+    if(index != 0 && (index >= self->length || index < 0)){                         \
+        fprintf(stderr, "Error on insert method: index bigger or equal than length\n"); \
         exit(VEC_INDEX_ERROR);                                      \
     }                                                               \
     if(self->length+1 == self->capacity){                           \
